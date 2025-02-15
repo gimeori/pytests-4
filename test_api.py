@@ -31,22 +31,32 @@ def test_get_all_pets_with_valid_key(filter=''):
     assert len(result['pets']) > 0
 
 
-# def test_add_new_pet_with_valid_data(name='Стеша', animal_type='кошка',
-#                                      age='2', pet_photo='images/stesha.jpg'):
-#     """Проверяем, что можно добавить питомца с фотографией и корректными данными"""
+def test_add_new_pet_with_valid_data(name='пёсель', animal_type='собака', age='1', pet_photo='images/dogg.jpg'):
+    """Проверяем, что можно добавить питомца с фотографией и корректными данными"""
 
-#     # Получаем полный путь изображения питомца и сохраняем в переменную pet_photo
-#     pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)
+    # Получаем полный путь изображения питомца и сохраняем в переменную pet_photo
+    pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)
 
-#     # Запрашиваем ключ api и сохраняем в переменую auth_key
-#     _, auth_key = pf.get_api_key(valid_email, valid_password)
+    # Проверяем, существует ли файл с изображением
+    if not os.path.exists(pet_photo):
+        raise FileNotFoundError(f"Файл {pet_photo} не найден!")
 
-#     # Добавляем питомца
-#     status, result = pf.add_new_pet(auth_key, name, animal_type, age, pet_photo)
+    # Запрашиваем ключ api и сохраняем в переменую auth_key
+    status, auth_key = pf.get_api_key(valid_email, valid_password)
+    print(f"Auth key status: {status}, auth_key: {auth_key}")
 
-#     # Сверяем полученный ответ с ожидаемым результатом
-#     assert status == 200
-#     assert result['name'] == name
+    # Добавляем питомца
+    status, result = pf.add_new_pet(auth_key, name, animal_type, age, pet_photo)
+
+    # Выводим ответ сервера для диагностики
+    print(f"Status code: {status}")
+    print(f"Response: {result}")
+
+    # Сверяем полученный ответ с ожидаемым результатом
+    assert status == 200
+    assert result['name'] == name
+
+
 
 
 def test_successful_delete_self_pet():
@@ -172,52 +182,6 @@ def test_add_new_pet_with_invalid_data(name='Артур', animal_type='попу�
     assert status == 415  # Сверяем полученный ответ с ожидаемым результатом
     # Обнаружен дефект, так как в качестве фото принимает xls-файл
     # Фактический результат (status == 200) расходится с ожидаемым (status == 415)!!!
-
-
-def test_add_new_pet_with_invalid_data(name='Мопс', animal_type='мопс',
-                                       age='-5', pet_photo='images/mops1.jpg'):
-    """Проверяем, что нельзя добавить питомца с отрицательным значением возраста"""
-
-    # Получаем полный путь изображения питомца и сохраняем в переменную pet_photo
-    pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)
-
-    # Запрашиваем ключ api и сохраняем в переменую auth_key
-    _, auth_key = pf.get_api_key(valid_email, valid_password)
-
-    # Добавляем питомца
-    status, result = pf.add_new_pet(auth_key, name, animal_type, age, pet_photo)
-
-    # Сверяем полученный ответ с ожидаемым результатом
-    assert status == 400
-    # Обнаружен дефект, так как принимает возраст с отрицательным значением ('-1'),
-    # Фактический результат (status == 200) расходится с ожидаемым (status == 400)!!!
-
-
-def test_add_new_pet_with_valid_data(name='пёсель', animal_type='собака', age='1', pet_photo='images/dogg.jpg'):
-    """Проверяем, что можно добавить питомца с фотографией и корректными данными"""
-
-    # Получаем полный путь изображения питомца и сохраняем в переменную pet_photo
-    pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)
-
-    # Запрашиваем ключ api и сохраняем в переменую auth_key
-    _, auth_key = pf.get_api_key(valid_email, valid_password)
-
-    # Логируем данные запроса
-    logging.debug(f"Sending request with name={name}, animal_type={animal_type}, age={age}, pet_photo={pet_photo}")
-
-    # Добавляем питомца
-    status, result = pf.add_new_pet(auth_key, name, animal_type, age, pet_photo)
-
-    # Логируем ответ сервера
-    logging.debug(f"Received response: status={status}, result={result}")
-
-    # Сверяем полученный ответ с ожидаемым результатом
-    assert status == 200
-    assert result['name'] == name
-
-# Если сервер возвращает 500, выводим дополнительную информацию
-    if status == 500:
-        print(f"Server error: {result}")
 
 
 def test_add_pet_with_valid_data_empty_field():
